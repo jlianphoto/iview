@@ -1,5 +1,5 @@
 <template>
-    <Table width="550" border :columns="columns2" :data="data3"></Table>
+    <Table width="550" border transition :columns="columns2" :data="data3"></Table>
 </template>
 <script>
     export default {
@@ -68,7 +68,8 @@
                         address: '北京市朝阳区芍药居',
                         province: '北京市',
                         city: '朝阳区',
-                        zip: 100000
+                        zip: 100000,
+                        id:11
                     },
                     {
                         name: '张小刚',
@@ -76,7 +77,8 @@
                         address: '北京市海淀区西二旗',
                         province: '北京市',
                         city: '海淀区',
-                        zip: 100000
+                        zip: 100000,
+                        id:12
                     },
                     {
                         name: '李小红',
@@ -84,7 +86,8 @@
                         address: '上海市浦东新区世纪大道',
                         province: '上海市',
                         city: '浦东新区',
-                        zip: 100000
+                        zip: 100000,
+                        id:13
                     },
                     {
                         name: '周小伟',
@@ -92,7 +95,8 @@
                         address: '深圳市南山区深南大道',
                         province: '广东',
                         city: '南山区',
-                        zip: 100000
+                        zip: 100000,
+                        id:14
                     }
                 ]
             }

@@ -358,4 +358,23 @@
         border-left:1px dashed @border-color-base;
         top:0;
     }
+
+    &-fixedHeadTop{
+        position: fixed;
+        top: 0;
+        z-index: 9999;
+    }
+
+    &-animate{
+        transition: all 0.4s;
+    }
+
+    &-animate-enter{
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+
+    &-animate-leave-to{
+        display: none;
+    }
 }

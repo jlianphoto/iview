@@ -3,36 +3,42 @@
         <colgroup>
             <col v-for="(column, index) in columns" :width="setCellWidth(column, index, false)">
         </colgroup>
-        <tbody :class="[prefixCls + '-tbody']">
-            <template v-for="(row, index) in data">
-                <tr
-                    :class="rowClasses(row._index)"
-                    @mouseenter.stop="handleMouseIn(row._index)"
-                    @mouseleave.stop="handleMouseOut(row._index)"
-                    @click.stop="clickCurrentRow(row._index)"
-                    @dblclick.stop="dblclickCurrentRow(row._index)">
-                    <td v-for="column in columns" :class="alignCls(column, row)">
-                        <Cell
-                            :fixed="fixed"
-                            :prefix-cls="prefixCls"
-                            :row="row"
-                            :key="row"
-                            :column="column"
-                            :natural-index="index"
-                            :index="row._index"
-                            :checked="rowChecked(row._index)"
-                            :disabled="rowDisabled(row._index)"
-                            :expanded="rowExpanded(row._index)"
-                        ></Cell>
-                    </td>
-                </tr>
-                <tr v-if="rowExpanded(row._index)">
-                    <td :colspan="columns.length" :class="prefixCls + '-expanded-cell'">
-                        <Expand :key="row" :row="row" :render="expandRender" :index="row._index"></Expand>
-                    </td>
-                </tr>
-            </template>
-        </tbody>
+        
+
+             <transition-group :name="transitionName" tag="tbody"  :class="[prefixCls + '-tbody']">
+                <template v-for="(row, index) in data">
+                    <tr
+                        :class="rowClasses(row._index)"
+                        :key="row.id"
+                        @mouseenter.stop="handleMouseIn(row._index)"
+                        @mouseleave.stop="handleMouseOut(row._index)"
+                        @click.stop="clickCurrentRow(row._index)"             
+                        @dblclick.stop="dblclickCurrentRow(row._index)">
+                        <td v-for="column in columns" :class="alignCls(column, row)">
+                            <Cell
+                                :fixed="fixed"
+                                :prefix-cls="prefixCls"
+                                :row="row"
+                                :key="row"
+                                :column="column"
+                                :natural-index="index"
+                                :index="row._index"
+                                :checked="rowChecked(row._index)"
+                                :disabled="rowDisabled(row._index)"
+                                :expanded="rowExpanded(row._index)"
+                            ></Cell>
+                        </td>
+                    </tr>
+                    <tr v-if="rowExpanded(row._index)" :key="'expanded'+row.id" :class="{'ivu-table-animate':transition}">
+                        <td :colspan="columns.length" :class="prefixCls + '-expanded-cell'">
+                            <Expand :key="row" :row="row" :render="expandRender" :index="row._index"></Expand>
+                        </td>
+                    </tr>
+                </template>
+            </transition-group>
+
+           
+
     </table>
 </template>
 <script>
@@ -52,6 +58,10 @@
             data: Array,    // rebuildData
             objData: Object,
             columnsWidth: Object,
+            transition:{
+                type: Boolean,
+                default: false
+            },
             fixed: {
                 type: [Boolean, String],
                 default: false
@@ -69,17 +79,26 @@
                     }
                 }
                 return render;
+            },
+            transitionName(){
+                if (this.transition) {
+                    return `${this.prefixCls}-animate`
+                }else{
+                    return ''
+                }
             }
         },
         methods: {
             rowClasses (_index) {
+                let transitionName = this.transition?`${this.prefixCls}-animate`:'';
                 return [
                     `${this.prefixCls}-row`,
                     this.rowClsName(_index),
                     {
                         [`${this.prefixCls}-row-highlight`]: this.objData[_index] && this.objData[_index]._isHighlight,
                         [`${this.prefixCls}-row-hover`]: this.objData[_index] && this.objData[_index]._isHover
-                    }
+                    },
+                    transitionName
                 ];
             },
             rowChecked (_index) {

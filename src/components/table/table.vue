@@ -14,6 +14,20 @@
                     @emitDrag="emitDrag"
                     ></table-head>
             </div>
+            <div :class="[prefixCls + '-header' , prefixCls+'-fixedHeadTop']" v-if="isfixHeadTopShow" ref="header" :style="{left:tableLeft}" @mousewheel="handleMouseWheel">
+                <table-head
+                    :prefix-cls="prefixCls"
+                    :styleObject="tableStyle"
+                    :columns="cloneColumns"
+                    :obj-data="objData"
+                    :columns-width="columnsWidth"
+                    :data="rebuildData"
+                    :draggable="draggable"
+                    @emitDrag="emitDrag"
+                    ></table-head>
+            </div>
+
+
             <div :class="[prefixCls + '-body']" :style="bodyStyle" ref="body" @scroll="handleBodyScroll"
                 v-show="!((!!localeNoDataText && (!data || data.length === 0)) || (!!localeNoFilteredDataText && (!rebuildData || rebuildData.length === 0)))">
                 <table-body
@@ -23,6 +37,7 @@
                     :columns="cloneColumns"
                     :data="rebuildData"
                     :columns-width="columnsWidth"
+                    :transition="transition"
                     :obj-data="objData"></table-body>
             </div>
             <div
@@ -52,6 +67,19 @@
                         :draggable="draggable"
                         @emitDrag="emitDrag"></table-head>
                 </div>
+                <div :class="[prefixCls + '-fixed-header' , prefixCls+'-fixedHeadTop']" v-if="isfixHeadTopShow" ref="header" :style="{left:tableLeft}">
+                    <table-head
+                        :prefix-cls="prefixCls"
+                        :styleObject="tableStyle"
+                        :columns="cloneColumns"
+                        :obj-data="objData"
+                        :columns-width="columnsWidth"
+                        :data="rebuildData"
+                        :draggable="draggable"
+                        @emitDrag="emitDrag"
+                        ></table-head>
+                </div>
+
                 <div :class="[prefixCls + '-fixed-body']" :style="fixedBodyStyle" ref="fixedBody">
                     <table-body
                         fixed="left"
@@ -60,6 +88,7 @@
                         :columns="leftFixedColumns"
                         :data="rebuildData"
                         :columns-width="columnsWidth"
+                        :transition="transition"
                         :obj-data="objData"></table-body>
                 </div>
             </div>
@@ -77,6 +106,19 @@
                         @emitDrag="emitDrag"
                         ></table-head>
                 </div>
+                <div :class="[prefixCls + '-fixed-header' , prefixCls+'-fixedHeadTop']" v-if="isfixHeadTopShow" ref="header" :style="{left:tableLeft}">
+                    <table-head
+                        :prefix-cls="prefixCls"
+                        :styleObject="tableStyle"
+                        :columns="cloneColumns"
+                        :obj-data="objData"
+                        :columns-width="columnsWidth"
+                        :data="rebuildData"
+                        :draggable="draggable"
+                        @emitDrag="emitDrag"
+                        ></table-head>
+                </div>
+
                 <div :class="[prefixCls + '-fixed-body']" :style="fixedBodyStyle" ref="fixedRightBody">
                     <table-body
                         fixed="right"
@@ -85,6 +127,7 @@
                         :columns="rightFixedColumns"
                         :data="rebuildData"
                         :columns-width="columnsWidth"
+                        :transition="transition"
                         :obj-data="objData"></table-body>
                 </div>
             </div>
@@ -143,9 +186,17 @@
                 type: Boolean,
                 default: false
             },
+            transition: {
+                type: Boolean,
+                default: false
+            },
             showHeader: {
                 type: Boolean,
                 default: true
+            },
+            fixedHeadTop: {
+                type: Boolean,
+                default: false
             },
             highlightRow: {
                 type: Boolean,
@@ -187,7 +238,10 @@
                 scrollBarWidth: getScrollBarSize(),
                 currentContext: this.context,
                 cloneData: deepCopy(this.data),    // when Cell has a button to delete row data, clickCurrentRow will throw an error, so clone a data
-                isShowResizeBorder:false
+                isShowResizeBorder:false,
+                isfixHeadTopShow:false,
+                tableLeft:0
+
             };
         },
         computed: {
@@ -712,6 +766,28 @@
                 }
                 this.isShowResizeBorder = true;
                 this.$refs.resizeBorder.style.left = borderLeft+'px';
+            },
+            fixedHeadTopHandler(){
+                function getScrollTop(){
+                    var scrollTop=0;
+                    if(document.documentElement&&document.documentElement.scrollTop){
+                        scrollTop=document.documentElement.scrollTop;
+                    }else if(document.body){
+                        scrollTop=document.body.scrollTop;
+                    }
+                    return scrollTop;
+                }
+                let rect = this.$el.getBoundingClientRect();
+                let tableTop = this.$el.offsetTop;
+                this.tableLeft = rect.left;
+                window.onscroll = ()=>{
+                    let scrollTop = getScrollTop();
+                    if (scrollTop>=tableTop) {
+                        this.isfixHeadTopShow  = true;
+                    }else{
+                        this.isfixHeadTopShow = false;
+                    }
+                }
             }
         },
         created () {
@@ -721,6 +797,10 @@
             this.rebuildData = this.makeDataWithSortAndFilter();
         },
         mounted () {
+            if (this.fixedHeadTop){
+                this.fixedHeadTopHandler();
+            };
+
             this.handleResize();
             this.fixedHeader();
             this.$nextTick(() => this.ready = true);
